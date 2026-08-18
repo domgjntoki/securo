@@ -56,6 +56,9 @@ export interface Workspace {
   is_archived: boolean
   default_currency: string
   locale: string | null
+  /** Where the workspace files. Selects the fiscal document pack; never the
+   *  interface language. */
+  tax_jurisdiction: string | null
   icon: string | null
   color: string | null
   created_at: string
@@ -186,11 +189,17 @@ export interface Collection {
 export interface AccountSummary {
   account_id: string
   current_balance: number
+  opening_balance: number
   monthly_income: number
   monthly_expenses: number
   current_balance_primary: number | null
+  opening_balance_primary: number | null
   monthly_income_primary: number | null
   monthly_expenses_primary: number | null
+  projected_income?: number
+  projected_expenses?: number
+  projected_income_primary?: number | null
+  projected_expenses_primary?: number | null
 }
 
 export interface Transaction {
@@ -242,6 +251,7 @@ export interface Transaction {
   parent_owner_name?: string | null
   // Flag to exclude this transaction from reports and dashboard aggregations
   is_ignored: boolean
+  virtual?: boolean
 }
 
 // Scope for installment-series edits/deletes: "this" (default) only touches
@@ -366,15 +376,40 @@ export interface GroupBalances {
   lines: GroupBalanceLine[]
 }
 
+/** A fiscal document belonging to a payee. `kind` mirrors the backend's
+ *  closed TaxIdKind; the value arrives normalised. */
+export interface PayeeTaxId {
+  kind: string
+  value: string
+}
+
 export interface Payee {
   id: string
   user_id: string
   name: string
-  type: 'merchant' | 'person' | 'company'
+  /** Legal nature, or null when unknown — the normal state for a row sync created. */
+  type: 'person' | 'company' | null
+  /** Where the row came from. Server-set at creation and never editable. */
+  source: 'manual' | 'sync' | 'import'
   is_favorite: boolean
   notes: string | null
+  email: string | null
+  phone: string | null
+  address: string | null
+  website: string | null
+  tax_ids: PayeeTaxId[]
   created_at: string
   transaction_count: number
+}
+
+/** One document kind as the active workspace's jurisdiction describes it.
+ *  `offered` marks the ones its pack asks for; the rest stay selectable,
+ *  because a counterparty's country is not the workspace's. */
+export interface TaxIdKindOption {
+  kind: string
+  label_key: string
+  mask: string | null
+  offered: boolean
 }
 
 export interface PayeeSummary {
@@ -491,6 +526,7 @@ export interface RecurringTransaction {
 
 export interface ProjectedTransaction {
   recurring_id: string
+  account_id: string | null
   description: string
   amount: number
   amount_primary: number | null
@@ -558,11 +594,17 @@ export interface TransactionCalendarResponse {
 export interface DashboardSummary {
   total_balance: Record<string, number>
   total_balance_primary: number
+  projected_balance: Record<string, number>
+  projected_balance_primary: number
   balance_date: string
   monthly_income: number
   monthly_expenses: number
   monthly_income_primary: number
   monthly_expenses_primary: number
+  projected_income?: number
+  projected_expenses?: number
+  projected_income_primary?: number
+  projected_expenses_primary?: number
   accounts_count: number
   pending_categorization: number
   pending_categorization_amount: number
@@ -618,7 +660,9 @@ export interface BudgetVsActual {
   group_name: string | null
   budget_amount: number | null
   actual_amount: number
+  projected_amount: number
   prev_month_amount: number
+  projected_prev_month_amount: number
   percentage_used: number | null
   is_recurring: boolean
 }

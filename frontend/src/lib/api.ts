@@ -28,6 +28,8 @@ import type {
   RuleImportResponse,
   ImportLog,
   ImportPreviewTransaction,
+  PayeeTaxId,
+  TaxIdKindOption,
   Workspace,
   WorkspaceKind,
   WorkspaceMember,
@@ -107,6 +109,7 @@ export const workspaces = {
     kind?: WorkspaceKind
     default_currency?: string
     locale?: string
+    tax_jurisdiction?: string | null
     icon?: string
     color?: string
     self_membership?: boolean
@@ -115,7 +118,12 @@ export const workspaces = {
     return data
   },
   // `kind` is absent on purpose: it is fixed when the workspace is created.
-  update: async (id: string, payload: Partial<Pick<Workspace, 'name' | 'icon' | 'color' | 'default_currency' | 'locale'>>): Promise<Workspace> => {
+  update: async (
+    id: string,
+    payload: Partial<
+      Pick<Workspace, 'name' | 'icon' | 'color' | 'default_currency' | 'locale'>
+    > & { tax_jurisdiction?: string | null },
+  ): Promise<Workspace> => {
     const { data } = await api.patch(`/workspaces/${id}`, payload)
     return data
   },
@@ -699,6 +707,38 @@ export const transactions = {
 }
 
 // Payees
+/** Jurisdiction metadata. Labels, masks and ordering come from the server so
+ *  the browser cannot disagree with it about what a document looks like. */
+export const fiscal = {
+  jurisdictions: async (): Promise<string[]> => {
+    const { data } = await api.get('/fiscal/jurisdictions')
+    return data.jurisdictions
+  },
+  taxIdKinds: async (): Promise<{
+    jurisdiction: string | null
+    kinds: TaxIdKindOption[]
+    /** Country to documents, for grouping and searching the picker by country. */
+    jurisdictions: { code: string; kinds: string[] }[]
+  }> => {
+    const { data } = await api.get('/fiscal/tax-id-kinds')
+    return data
+  },
+}
+
+export interface PayeeWritePayload {
+  name?: string
+  /** Null clears the legal nature. `source` is never writable. */
+  type?: 'person' | 'company' | null
+  notes?: string
+  email?: string | null
+  phone?: string | null
+  address?: string | null
+  website?: string | null
+  is_favorite?: boolean
+  /** Replaces the whole set. Omit to leave documents untouched. */
+  tax_ids?: PayeeTaxId[]
+}
+
 export const payees = {
   list: async (params?: { q?: string; type?: string; is_favorite?: boolean } | Record<string, unknown>): Promise<Payee[]> => {
     const cleanParams = params && !('queryKey' in params) ? params : undefined
@@ -713,11 +753,11 @@ export const payees = {
     const { data } = await api.get(`/payees/${id}/summary`, { params: { from, to } })
     return data
   },
-  create: async (payee: { name: string; type?: string; notes?: string }): Promise<Payee> => {
+  create: async (payee: PayeeWritePayload & { name: string }): Promise<Payee> => {
     const { data } = await api.post('/payees', payee)
     return data
   },
-  update: async (id: string, payee: Partial<Payee>): Promise<Payee> => {
+  update: async (id: string, payee: PayeeWritePayload): Promise<Payee> => {
     const { data } = await api.patch(`/payees/${id}`, payee)
     return data
   },
@@ -1016,8 +1056,8 @@ export const dashboard = {
     const { data } = await api.get('/dashboard/monthly-trend', { params: { months, ...(extra.params ?? {}) }, ...(extra.paramsSerializer ? { paramsSerializer: extra.paramsSerializer } : {}) })
     return data
   },
-  projectedTransactions: async (month?: string): Promise<ProjectedTransaction[]> => {
-    const { data } = await api.get('/dashboard/projected-transactions', { params: { month } })
+  projectedTransactions: async (params?: { month?: string; account_id?: string; from?: string; to?: string }): Promise<ProjectedTransaction[]> => {
+    const { data } = await api.get('/dashboard/projected-transactions', { params })
     return data
   },
   balanceHistory: async (month?: string, accountIds?: string[]): Promise<BalanceHistory> => {
