@@ -669,36 +669,36 @@
       "connecting": "Conectando…",
       "ibkr": {
         "title": "Conectar Interactive Brokers",
-        "description": "Use uma consulta Activity Flex somente leitura. Informe o token do Flex Web Service e o ID da consulta do IBKR.",
+        "description": "Use uma consulta Activity Flex somente para leitura. Informe o token do Flex Web Service e o ID da consulta da IBKR.",
         "reconnectTitle": "Reconectar Interactive Brokers",
-        "reconnectDescription": "Informe o novo token Flex e o ID da consulta novamente. Os dados existentes no Securo serao preservados.",
-        "openSetup": "Abrir guia de configuracao do IBKR Flex",
+        "reconnectDescription": "Informe novamente o token Flex recém-gerado e o ID da consulta. Os dados existentes no Securo serão preservados.",
+        "openSetup": "Abrir guia de configuração do IBKR Flex",
         "tokenLabel": "Token do Flex Web Service",
         "tokenPlaceholder": "Cole o token do IBKR Flex",
-        "tokenHelp": "O Securo armazena este token criptografado. Gerar outro token no IBKR invalida o anterior.",
+        "tokenHelp": "O Securo armazena esse token de forma criptografada. Gerá-lo novamente na IBKR invalida o token anterior.",
         "queryIdLabel": "ID da consulta Activity Flex",
         "queryIdPlaceholder": "Por exemplo, 123456",
-        "queryChecklistTitle": "Secoes obrigatorias da consulta XML",
-        "queryChecklistAccount": "Account Information: ID da conta, nome ou apelido e moeda",
-        "queryChecklistCash": "Cash Report: detalhamento por moeda e saldo final",
-        "queryChecklistFunds": "Statement of Funds: IDs, datas, descricoes, valores e moeda",
-        "queryChecklistPositions": "Open Positions: nivel Summary com identificadores, quantidade, valor, preco e custo",
-        "errorHelp": "Abrir o guia de configuracao do IBKR Flex",
+        "queryChecklistTitle": "Seções obrigatórias da consulta XML",
+        "queryChecklistAccount": "Informações da conta (Account Information): ID da conta, nome ou apelido e moeda",
+        "queryChecklistCash": "Relatório de caixa (Cash Report): detalhamento por moeda e saldo final",
+        "queryChecklistFunds": "Demonstrativo de fundos (Statement of Funds): IDs da transação e da operação, datas, descrições, valores e moeda",
+        "queryChecklistPositions": "Posições abertas (Open Positions): nível de detalhe “Summary” com identificadores, quantidade, valor, preço e custo de aquisição",
+        "errorHelp": "Abrir o guia de configuração do IBKR Flex",
         "errors": {
-          "flex_service_inactive": "Ative o Flex Web Service no IBKR e tente novamente.",
+          "flex_service_inactive": "Ative o Flex Web Service na IBKR e tente novamente.",
           "credentials_expired": "O token do IBKR Flex expirou. Gere um novo token e reconecte.",
-          "flex_ip_restricted": "O IBKR rejeitou o IP deste servidor. Atualize a restricao de IP e reconecte.",
-          "flex_query_invalid": "O ID da consulta Activity Flex e invalido ou nao esta disponivel.",
-          "credentials_invalid": "O token do IBKR Flex e invalido. Gere um novo token e reconecte.",
-          "flex_account_invalid": "A conta IBKR desta consulta Flex e invalida ou nao esta disponivel.",
+          "flex_ip_restricted": "A IBKR rejeitou o IP deste servidor. Atualize a restrição de IP e reconecte.",
+          "flex_query_invalid": "O ID da consulta Activity Flex é inválido ou não está disponível.",
+          "credentials_invalid": "O token do IBKR Flex é inválido. Gere um novo token e reconecte.",
+          "flex_account_invalid": "A conta IBKR desta consulta Flex é inválida ou não está disponível.",
           "flex_query_account_count": "A consulta Flex deve retornar exatamente uma conta IBKR.",
-          "flex_query_missing_section": "Falta uma secao obrigatoria na consulta Flex.",
-          "flex_query_missing_field": "Falta um campo obrigatorio na consulta Flex.",
-          "flex_query_position_detail": "Open Positions deve usar o nivel de detalhe Summary.",
-          "flex_request_invalid": "A IBKR nao conseguiu validar a solicitacao Flex. Confira o token e o ID da consulta.",
-          "flex_query_output_format": "Defina o formato de saida da Activity Flex Query como XML.",
-          "provider_rate_limited": "A IBKR esta limitando as solicitacoes. Tente novamente em um minuto.",
-          "provider_transient": "A IBKR nao conseguiu concluir o relatorio. Tente novamente mais tarde."
+          "flex_query_missing_section": "Falta uma seção obrigatória na consulta Flex.",
+          "flex_query_missing_field": "Falta um campo obrigatório na consulta Flex.",
+          "flex_query_position_detail": "A seção Open Positions deve usar o nível de detalhe Summary.",
+          "flex_request_invalid": "A IBKR não conseguiu validar a solicitação Flex. Confira o token e o ID da consulta.",
+          "flex_query_output_format": "Defina o formato de saída da Activity Flex Query como XML.",
+          "provider_rate_limited": "A IBKR está limitando as solicitações. Tente novamente em um minuto.",
+          "provider_transient": "A IBKR não conseguiu concluir o relatório. Tente novamente mais tarde."
         }
       },
       "simplefin": {
@@ -711,7 +711,7 @@
     },
     "providers": {
       "ibkr": {
-        "description": "Sincronizacao somente leitura via IBKR Flex Web Service"
+        "description": "Sincronização da conta de investimentos, somente para leitura, via IBKR Flex Web Service"
       },
       "pluggy": {
         "description": "Provedor Open Finance para bancos brasileiros"
