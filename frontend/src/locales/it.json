@@ -657,6 +657,40 @@
       "tokenHelp": "Il token di configurazione è monouso. Securo ne ricava un URL di accesso privato e lo memorizza cifrato.",
       "connect": "Collega",
       "connecting": "Connessione…",
+      "ibkr": {
+        "title": "Connect Interactive Brokers",
+        "description": "Use a read-only Activity Flex Query. Enter the Flex Web Service token and query ID from IBKR.",
+        "reconnectTitle": "Reconnect Interactive Brokers",
+        "reconnectDescription": "Enter the newly generated Flex token and the query ID again. Existing Securo data is preserved.",
+        "openSetup": "Open IBKR Flex setup guide",
+        "tokenLabel": "Flex Web Service token",
+        "tokenPlaceholder": "Paste the IBKR Flex token",
+        "tokenHelp": "Securo stores this token encrypted. Regenerating it in IBKR invalidates the previous token.",
+        "queryIdLabel": "Activity Flex Query ID",
+        "queryIdPlaceholder": "For example, 123456",
+        "queryChecklistTitle": "Required XML query sections",
+        "queryChecklistAccount": "Account Information: account ID, name or alias, and currency",
+        "queryChecklistCash": "Cash Report: currency breakout and ending cash",
+        "queryChecklistFunds": "Statement of Funds: transaction ID, trade ID, dates, descriptions, amounts, and currency",
+        "queryChecklistPositions": "Open Positions: Summary detail with identifiers, quantity, value, price, and cost basis",
+        "errorHelp": "Apri la guida alla configurazione di IBKR Flex",
+        "errors": {
+          "flex_service_inactive": "Abilita Flex Web Service in IBKR e riprova.",
+          "credentials_expired": "Il token IBKR Flex e scaduto. Generane uno nuovo e riconnetti.",
+          "flex_ip_restricted": "IBKR ha rifiutato l'IP di questo server. Aggiorna la restrizione IP e riconnetti.",
+          "flex_query_invalid": "L'ID della query Activity Flex non e valido o disponibile.",
+          "credentials_invalid": "Il token IBKR Flex non e valido. Generane uno nuovo e riconnetti.",
+          "flex_account_invalid": "Il conto IBKR di questa query Flex non e valido o disponibile.",
+          "flex_query_account_count": "La query Flex deve restituire esattamente un conto IBKR.",
+          "flex_query_missing_section": "Nella query Flex manca una sezione obbligatoria.",
+          "flex_query_missing_field": "Nella query Flex manca un campo obbligatorio.",
+          "flex_query_position_detail": "Open Positions deve usare il livello di dettaglio Summary.",
+          "flex_request_invalid": "IBKR non ha potuto convalidare la richiesta Flex. Controlla token e ID query.",
+          "flex_query_output_format": "Imposta il formato di output della Activity Flex Query su XML.",
+          "provider_rate_limited": "IBKR sta limitando le richieste. Riprova tra un minuto.",
+          "provider_transient": "IBKR non ha potuto completare il report. Riprova piu tardi."
+        }
+      },
       "simplefin": {
         "title": "Collega tramite SimpleFIN",
         "description": "SimpleFIN è un protocollo di dati bancari in sola lettura. Vai su SimpleFIN Bridge, scegli la tua banca e copia qui il token di configurazione."
@@ -666,6 +700,9 @@
       "reconnect": "Riconnetti"
     },
     "providers": {
+      "ibkr": {
+        "description": "Read-only brokerage sync via IBKR Flex Web Service"
+      },
       "pluggy": {
         "description": "Provider open finance per le banche brasiliane"
       },

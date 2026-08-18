@@ -663,6 +663,40 @@
       "tokenHelp": "Установочный токен одноразовый. Securo получает из него приватный URL доступа и хранит его зашифрованным.",
       "connect": "Подключить",
       "connecting": "Подключение…",
+      "ibkr": {
+        "title": "Connect Interactive Brokers",
+        "description": "Use a read-only Activity Flex Query. Enter the Flex Web Service token and query ID from IBKR.",
+        "reconnectTitle": "Reconnect Interactive Brokers",
+        "reconnectDescription": "Enter the newly generated Flex token and the query ID again. Existing Securo data is preserved.",
+        "openSetup": "Open IBKR Flex setup guide",
+        "tokenLabel": "Flex Web Service token",
+        "tokenPlaceholder": "Paste the IBKR Flex token",
+        "tokenHelp": "Securo stores this token encrypted. Regenerating it in IBKR invalidates the previous token.",
+        "queryIdLabel": "Activity Flex Query ID",
+        "queryIdPlaceholder": "For example, 123456",
+        "queryChecklistTitle": "Required XML query sections",
+        "queryChecklistAccount": "Account Information: account ID, name or alias, and currency",
+        "queryChecklistCash": "Cash Report: currency breakout and ending cash",
+        "queryChecklistFunds": "Statement of Funds: transaction ID, trade ID, dates, descriptions, amounts, and currency",
+        "queryChecklistPositions": "Open Positions: Summary detail with identifiers, quantity, value, price, and cost basis",
+        "errorHelp": "Otkryt rukovodstvo po nastroike IBKR Flex",
+        "errors": {
+          "flex_service_inactive": "Vklyuchite Flex Web Service v IBKR i povtorite popytku.",
+          "credentials_expired": "Srok deistviya tokena IBKR Flex istek. Sozdaite novyi token i podklyuchites zanovo.",
+          "flex_ip_restricted": "IBKR otklonil IP-adres etogo servera. Izmenite ogranichenie IP i podklyuchites zanovo.",
+          "flex_query_invalid": "ID zaprosa Activity Flex neveren ili nedostupen.",
+          "credentials_invalid": "Token IBKR Flex neveren. Sozdaite novyi token i podklyuchites zanovo.",
+          "flex_account_invalid": "Schet IBKR v etom zaprose Flex neveren ili nedostupen.",
+          "flex_query_account_count": "Zapros Flex dolzhen vozvrashchat rovno odin schet IBKR.",
+          "flex_query_missing_section": "V zaprose Flex otsutstvuet obyazatelnyi razdel otcheta.",
+          "flex_query_missing_field": "V zaprose Flex otsutstvuet obyazatelnoe pole otcheta.",
+          "flex_query_position_detail": "Open Positions dolzhen ispolzovat uroven detalizatsii Summary.",
+          "flex_request_invalid": "IBKR ne smog proverit zapros Flex. Proverte token i ID zaprosa.",
+          "flex_query_output_format": "Ustanovite format vyvoda Activity Flex Query v XML.",
+          "provider_rate_limited": "IBKR ogranichivaet chastotu zaprosov. Povtorite cherez minutu.",
+          "provider_transient": "IBKR ne smog zavershit otchet. Povtorite pozzhe."
+        }
+      },
       "simplefin": {
         "title": "Подключение через SimpleFIN",
         "description": "SimpleFIN — это протокол банковских данных только для чтения. Перейдите в SimpleFIN Bridge, выберите свой банк и скопируйте установочный токен сюда."
@@ -672,6 +706,9 @@
       "reconnect": "Переподключить"
     },
     "providers": {
+      "ibkr": {
+        "description": "Read-only brokerage sync via IBKR Flex Web Service"
+      },
       "pluggy": {
         "description": "Провайдер открытых финансов для бразильских банков"
       },
