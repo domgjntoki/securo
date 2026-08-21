@@ -629,7 +629,7 @@
     "noTransactions": "Nenhuma transação para esta conta",
     "syncFailed": "Sincronização falhou",
     "reconnect": "Reconectar",
-    "connectionError": "Erro na ligação — reconecte para corrigir",
+    "connectionError": "Erro na ligação — tente sincronizar novamente",
     "close": "Encerrar conta",
     "reopen": "Reabrir conta",
     "accountClosed": "Conta encerrada",

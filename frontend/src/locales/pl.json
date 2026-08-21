@@ -668,7 +668,7 @@
     "noTransactions": "Brak transakcji dla tego konta",
     "syncFailed": "Synchronizacja nie powiodła się",
     "reconnect": "Połącz ponownie",
-    "connectionError": "Błąd połączenia — połącz ponownie, aby naprawić",
+    "connectionError": "Błąd połączenia — spróbuj zsynchronizować ponownie",
     "close": "Zamknij konto",
     "reopen": "Otwórz konto ponownie",
     "accountClosed": "Zamknięto konto",

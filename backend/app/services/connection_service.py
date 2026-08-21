@@ -1692,16 +1692,21 @@ async def sync_connection(
             if conn:
                 conn.status = "expired"
         raise
-    except ProviderUserActionRequired:
-        # Stale/revoked provider credentials require a non-destructive
-        # reconnect path. Mark the connection unhealthy so the accounts page
-        # shows the reconnect banner, then let the API return a typed 409
-        # instead of a generic 500.
+    except ProviderUserActionRequired as exc:
+        # Keep retryable user-action failures distinct from credentials that
+        # the provider has explicitly rejected. A saved token/query can still
+        # be reused after the user fixes an IBKR query, enables Flex, or
+        # updates an IP restriction; only invalid/expired credentials should
+        # force the reconnect flow.
         await session.rollback()
         async with session.begin():
             conn = await session.get(BankConnection, connection_id)
             if conn:
-                conn.status = "error"
+                conn.status = (
+                    "expired"
+                    if exc.code in {"credentials_invalid", "credentials_expired"}
+                    else "error"
+                )
         raise
     except (ProviderRateLimited, ProviderTransientError):
         # The bank/aggregator is throttling data requests (PSD2 caps unattended

@@ -629,7 +629,7 @@
     "noTransactions": "No transactions for this account",
     "syncFailed": "Sync failed",
     "reconnect": "Reconnect",
-    "connectionError": "Connection error — reconnect to fix",
+    "connectionError": "Connection error — try syncing again",
     "close": "Close account",
     "reopen": "Reopen account",
     "accountClosed": "Account closed",
