@@ -9,6 +9,7 @@ import { currencies as currenciesApi, transactions as transactionsApi, settings 
 import { localDateString } from '@/lib/date-utils'
 import { invalidateFinancialQueries } from '@/lib/invalidate-queries'
 import { normalizeRuleMatchValue } from '@/lib/rule-match-utils'
+import { flattenConditions, hasConditionGroups } from '@/lib/rule-conditions'
 import { cn, normalizeText } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -94,6 +95,10 @@ function getRuleCategoryId(rule: Rule): string | null {
 }
 
 function canExtendRuleFromTransaction(rule: Rule): boolean {
+  // Rules that mix AND and OR are left out: appending a top-level condition —
+  // and possibly flipping the rule to OR — would silently change what the
+  // grouped rule matches. Those are edited from the rules page instead.
+  if (hasConditionGroups(rule.conditions)) return false
   return rule.is_active && !!getRuleCategoryId(rule) && (rule.conditions_op === 'or' || rule.conditions.length <= 1)
 }
 
@@ -560,7 +565,7 @@ function TransactionForm({
       rule: Rule
       condition: RuleCondition
     }) => {
-      const duplicate = rule.conditions.some(existing =>
+      const duplicate = flattenConditions(rule.conditions).some(existing =>
         existing.field === condition.field &&
         existing.op === condition.op &&
         normalizeRuleMatchValue(existing.value) === normalizeRuleMatchValue(condition.value)
@@ -906,6 +911,15 @@ function TransactionForm({
             className="bg-card"
           />
         )}
+        {transaction?.original_description &&
+          transaction.original_description !== transaction.description && (
+            <p className="text-xs text-muted-foreground">
+              {t('transactions.originalDescription')}: {transaction.original_description}
+            </p>
+          )}
+        {/* Rows that pre-date the original_description column have no
+            provenance to show, so the raw payee stays the only hint at what
+            the bank actually sent. */}
         {isSynced && transaction?.payee && transaction.payee !== transaction.description && (
           <p className="text-xs text-muted-foreground">{transaction.payee}</p>
         )}
