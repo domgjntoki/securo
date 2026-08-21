@@ -444,7 +444,7 @@ async def test_oauth_callback_reconnect_updates_existing(
     assert result.institution_name == "NewName"
     assert result.credentials == {"token": "fresh"}
     assert result.status == "active"
-    assert result.last_sync_at is None
+    assert result.last_sync_at is not None
 
 
 # ---------------------------------------------------------------------------
