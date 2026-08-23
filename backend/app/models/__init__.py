@@ -24,6 +24,18 @@ from app.models.group import Group, GroupMember
 from app.models.transaction_split import TransactionSplit
 from app.models.group_settlement import GroupSettlement
 from app.models.collection import Collection, collection_accounts, collection_asset_groups
+from app.models.investment_advisor import (
+    InvestmentContributionAllocation,
+    InvestmentContributionPlan,
+    InvestmentInstrumentAnswer,
+    InvestmentInstrumentAssetLink,
+    InvestmentQuestion,
+    InvestmentQuestionBank,
+    InvestmentStrategy,
+    InvestmentStrategyClass,
+    InvestmentStrategyInstrument,
+    InvestmentStrategyWallet,
+)
 
 # Side-effect import: register the before_insert listener that auto-stamps
 # workspace_id from user_id on financial entities. Imported last so all
@@ -63,4 +75,14 @@ __all__ = [
     "Collection",
     "collection_accounts",
     "collection_asset_groups",
+    "InvestmentStrategy",
+    "InvestmentStrategyWallet",
+    "InvestmentStrategyClass",
+    "InvestmentQuestionBank",
+    "InvestmentQuestion",
+    "InvestmentStrategyInstrument",
+    "InvestmentInstrumentAssetLink",
+    "InvestmentInstrumentAnswer",
+    "InvestmentContributionPlan",
+    "InvestmentContributionAllocation",
 ]
