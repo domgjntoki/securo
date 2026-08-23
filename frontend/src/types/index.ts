@@ -829,6 +829,173 @@ export interface AssetValue {
   source: string
 }
 
+export type AdvisorScoringMode = 'questionnaire' | 'manual' | 'percentage'
+export type AdvisorPurchaseMode = 'whole_units' | 'fractional_units' | 'cash_amount' | 'fixed_income_hybrid'
+export type AdvisorPriceSource = 'manual' | 'market'
+
+export interface AdvisorQuestion {
+  id: string
+  label: string
+  text: string
+  position: number
+}
+
+export interface AdvisorQuestionBank {
+  id: string
+  name: string
+  position: number
+  questions: AdvisorQuestion[]
+}
+
+export interface StrategyClass {
+  id: string
+  template_key: string | null
+  name: string
+  target_percentage: number
+  scoring_mode: AdvisorScoringMode
+  purchase_mode: AdvisorPurchaseMode
+  quantity_decimals: number
+  question_bank_id: string | null
+  display_currency: string | null
+  position: number
+  is_archived: boolean
+}
+
+export interface StrategyInstrument {
+  id: string
+  class_id: string
+  name: string
+  ticker: string | null
+  exchange: string | null
+  currency: string
+  isin: string | null
+  manual_price: number | null
+  cached_price_at: string | null
+  price_source: AdvisorPriceSource
+  manual_strength: number | null
+  target_percentage: number | null
+  strength: number | null
+  allocatable: boolean
+  current_value: number
+  current_quantity: number
+  unit_price: number | null
+  linked_asset_ids: string[]
+  yes_question_ids: string[]
+  warnings: string[]
+}
+
+export interface InstrumentMatchCandidate {
+  asset_id: string
+  asset_name: string
+  wallet_id: string
+  match_kind: 'isin' | 'ticker_exchange_currency'
+  ticker: string | null
+  exchange: string | null
+  currency: string
+  isin: string | null
+  current_value: number | null
+  current_quantity: number
+  already_linked: boolean
+}
+
+export interface InvestmentStrategy {
+  id: string
+  name: string
+  currency: string
+  home_country: string
+  wallet_ids: string[]
+  is_archived: boolean
+  classes: StrategyClass[]
+  question_banks: AdvisorQuestionBank[]
+  instruments: StrategyInstrument[]
+  created_at: string
+}
+
+export interface ContributionAllocation {
+  id?: string | null
+  instrument_id: string | null
+  instrument_name: string
+  class_id: string | null
+  class_name: string
+  current_value: number
+  current_quantity: number
+  unit_price: number | null
+  strength: number | null
+  target_percentage: number | null
+  suggested_value: number
+  suggested_quantity: number | null
+  after_percentage: number
+  excluded: boolean
+  executed_at?: string | null
+  actual_value?: number | null
+  actual_quantity?: number | null
+  execution_note?: string | null
+}
+
+export interface ContributionPreview {
+  strategy_id: string
+  currency: string
+  amount: number
+  portfolio_total: number
+  new_total: number
+  residual: number
+  algorithm_version: string
+  calculated_at: string
+  allocations: ContributionAllocation[]
+  class_totals: Record<string, number>
+  excluded_instrument_ids: string[]
+  warnings: string[]
+  fx_rates: Record<string, number>
+  class_snapshot: Array<{
+    id: string
+    name: string
+    target_percentage: number
+    scoring_mode: AdvisorScoringMode
+    purchase_mode: AdvisorPurchaseMode
+    quantity_decimals: number
+    question_bank_id: string | null
+    display_currency: string | null
+  }>
+  instrument_snapshot: Array<{
+    id: string
+    class_id: string
+    name: string
+    currency: string
+    current_value: number
+    current_quantity: number
+    unit_price: number | null
+    price_timestamp: string | null
+    strength: number | null
+    target_percentage: number | null
+    allocatable: boolean
+    linked_asset_ids: string[]
+  }>
+}
+
+export interface ContributionPlan extends ContributionPreview {
+  id: string
+  created_at: string
+}
+
+export interface PlanAllocationPrice {
+  allocation_id: string
+  instrument_id: string | null
+  unit_price: number | null
+  estimated_value: number
+  estimated_quantity: number | null
+  price_as_of: string | null
+  available: boolean
+}
+
+export interface PlanPriceRefresh {
+  plan_id: string
+  currency: string
+  refreshed_at: string
+  allocations: PlanAllocationPrice[]
+  warnings: string[]
+  fx_rates: Record<string, number>
+}
+
 export interface Goal {
   id: string
   user_id: string

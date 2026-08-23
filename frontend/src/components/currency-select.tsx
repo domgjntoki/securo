@@ -47,11 +47,12 @@ interface CurrencySelectProps {
   onChange: (code: string) => void
   id?: string
   className?: string
+  disabled?: boolean
 }
 
-export function CurrencySelect({ value, onChange, id, className }: CurrencySelectProps) {
+export function CurrencySelect({ value, onChange, id, className, disabled }: CurrencySelectProps) {
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select value={value} onValueChange={onChange} disabled={disabled}>
       <SelectTrigger id={id} className={cn('w-full', className)}>
         <SelectValue />
       </SelectTrigger>

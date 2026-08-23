@@ -61,6 +61,13 @@ import type {
   TransactionEditPayload,
   InstallmentSeriesInput,
   TransactionApplyScope,
+  InvestmentStrategy,
+  StrategyClass,
+  StrategyInstrument,
+  InstrumentMatchCandidate,
+  ContributionPreview,
+  ContributionPlan,
+  PlanPriceRefresh,
 } from '@/types'
 
 const api = axios.create({
@@ -1191,6 +1198,121 @@ export const assets = {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+  },
+}
+
+export const investmentStrategies = {
+  list: async (includeArchived = false): Promise<InvestmentStrategy[]> => {
+    const { data } = await api.get('/investment-strategies', { params: { include_archived: includeArchived } })
+    return data
+  },
+  get: async (id: string): Promise<InvestmentStrategy> => {
+    const { data } = await api.get(`/investment-strategies/${id}`)
+    return data
+  },
+  create: async (payload: { name: string; currency?: string; home_country?: string; wallet_ids: string[] }): Promise<InvestmentStrategy> => {
+    const { data } = await api.post('/investment-strategies', payload)
+    return data
+  },
+  update: async (id: string, payload: Partial<{ name: string; currency: string; home_country: string; wallet_ids: string[] }>): Promise<InvestmentStrategy> => {
+    const { data } = await api.patch(`/investment-strategies/${id}`, payload)
+    return data
+  },
+  archive: async (id: string): Promise<void> => {
+    await api.delete(`/investment-strategies/${id}`)
+  },
+  deletePermanently: async (id: string): Promise<void> => {
+    await api.delete(`/investment-strategies/${id}/permanent`)
+  },
+  updateTargets: async (id: string, targets: { class_id: string; target_percentage: number }[]): Promise<void> => {
+    await api.put(`/investment-strategies/${id}/targets`, { targets })
+  },
+  createClass: async (id: string, payload: Omit<StrategyClass, 'id' | 'template_key' | 'is_archived'>): Promise<StrategyClass> => {
+    const { data } = await api.post(`/investment-strategies/${id}/classes`, payload)
+    return data
+  },
+  updateClass: async (id: string, classId: string, payload: Partial<Omit<StrategyClass, 'id' | 'template_key'>>): Promise<StrategyClass> => {
+    const { data } = await api.patch(`/investment-strategies/${id}/classes/${classId}`, payload)
+    return data
+  },
+  updateQuestionBank: async (id: string, bankId: string, payload: { name?: string; position?: number }) => {
+    const { data } = await api.patch(`/investment-strategies/${id}/question-banks/${bankId}`, payload)
+    return data
+  },
+  createQuestionBank: async (id: string, payload: { name: string }) => {
+    const { data } = await api.post(`/investment-strategies/${id}/question-banks`, payload)
+    return data
+  },
+  deleteQuestionBank: async (id: string, bankId: string): Promise<void> => {
+    await api.delete(`/investment-strategies/${id}/question-banks/${bankId}`)
+  },
+  createQuestion: async (id: string, bankId: string, payload: { label: string; text: string; position?: number }) => {
+    const { data } = await api.post(`/investment-strategies/${id}/question-banks/${bankId}/questions`, payload)
+    return data
+  },
+  deleteQuestion: async (id: string, questionId: string): Promise<void> => {
+    await api.delete(`/investment-strategies/${id}/questions/${questionId}`)
+  },
+  updateQuestion: async (id: string, questionId: string, payload: { label?: string; text?: string; position?: number }) => {
+    const { data } = await api.patch(`/investment-strategies/${id}/questions/${questionId}`, payload)
+    return data
+  },
+  createInstrument: async (id: string, payload: {
+    class_id: string; name: string; ticker?: string | null; exchange?: string | null; currency: string;
+    isin?: string | null; current_price?: number | null; price_source?: 'manual' | 'market'; manual_strength?: number | null;
+    target_percentage?: number | null; yes_question_ids?: string[]; asset_ids?: string[]
+  }): Promise<StrategyInstrument> => {
+    const { data } = await api.post(`/investment-strategies/${id}/instruments`, payload)
+    return data
+  },
+  updateInstrument: async (id: string, instrumentId: string, payload: Partial<{
+    class_id: string; name: string; ticker: string | null; exchange: string | null; currency: string;
+    isin: string | null; manual_price: number | null; price_source: 'manual' | 'market'; manual_strength: number | null;
+    target_percentage: number | null;
+    yes_question_ids: string[]; asset_ids: string[]
+  }>): Promise<StrategyInstrument> => {
+    const { data } = await api.patch(`/investment-strategies/${id}/instruments/${instrumentId}`, payload)
+    return data
+  },
+  deleteInstrument: async (id: string, instrumentId: string): Promise<void> => {
+    await api.delete(`/investment-strategies/${id}/instruments/${instrumentId}`)
+  },
+  matches: async (id: string, instrumentId: string): Promise<InstrumentMatchCandidate[]> => {
+    const { data } = await api.get(`/investment-strategies/${id}/instruments/${instrumentId}/matches`)
+    return data
+  },
+  confirmMatches: async (id: string, instrumentId: string, asset_ids: string[]): Promise<StrategyInstrument> => {
+    const { data } = await api.post(`/investment-strategies/${id}/instruments/${instrumentId}/matches/confirm`, { asset_ids })
+    return data
+  },
+  refreshMarketData: async (id: string): Promise<{ warnings: string[] }> => {
+    const { data } = await api.post(`/investment-strategies/${id}/refresh-market-data`)
+    return data
+  },
+  preview: async (id: string, amount: number, exclude_instrument_ids: string[] = []): Promise<ContributionPreview> => {
+    const { data } = await api.post(`/investment-strategies/${id}/preview`, { amount, exclude_instrument_ids })
+    return data
+  },
+  savePlan: async (id: string, amount: number, exclude_instrument_ids: string[] = []): Promise<ContributionPlan> => {
+    const { data } = await api.post(`/investment-strategies/${id}/plans`, { amount, exclude_instrument_ids })
+    return data
+  },
+  plans: async (id: string): Promise<ContributionPlan[]> => {
+    const { data } = await api.get(`/investment-strategies/${id}/plans`)
+    return data
+  },
+  deletePlan: async (strategyId: string, planId: string): Promise<void> => {
+    await api.delete(`/investment-strategies/${strategyId}/plans/${planId}`)
+  },
+  refreshPlanPrices: async (strategyId: string, planId: string): Promise<PlanPriceRefresh> => {
+    const { data } = await api.post(`/investment-strategies/${strategyId}/plans/${planId}/refresh-prices`)
+    return data
+  },
+  updateExecution: async (strategyId: string, planId: string, allocationId: string, payload: {
+    executed: boolean; actual_value?: number | null; actual_quantity?: number | null; note?: string | null
+  }): Promise<ContributionPlan> => {
+    const { data } = await api.patch(`/investment-strategies/${strategyId}/plans/${planId}/allocations/${allocationId}`, payload)
+    return data
   },
 }
 

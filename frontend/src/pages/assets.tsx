@@ -40,6 +40,7 @@ import {
   Bitcoin,
   PieChart,
   AlertTriangle,
+  Compass,
   Upload,
 } from 'lucide-react'
 import {
@@ -1051,6 +1052,13 @@ export default function AssetsPage() {
           className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${activeTab === 'transactions' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
         >
           {t('assets.tabTransactions')}
+        </button>
+        <button
+          onClick={() => navigate('/assets/advisor')}
+          className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5"
+        >
+          <Compass size={14} />
+          {t('investmentAdvisor.title')}
         </button>
       </div>
 

@@ -39,13 +39,14 @@ describe('nav catalog', () => {
   })
 
   it('has a link for every module in the catalog', () => {
-    const covered = navItems.filter((i) => i.type === 'link').map((i) => i.module)
+    const covered = new Set(navItems.filter((i) => i.type === 'link').map((i) => i.module))
     expect([...covered].sort()).toEqual([...MODULE_IDS].sort())
   })
 
-  it('gives every link a distinct module', () => {
-    const covered = navItems.filter((i) => i.type === 'link').map((i) => i.module)
-    expect(new Set(covered).size).toBe(covered.length)
+  it('gives every link a distinct key and path', () => {
+    const links = navItems.filter((i) => i.type === 'link')
+    expect(new Set(links.map((i) => i.key)).size).toBe(links.length)
+    expect(new Set(links.map((i) => i.path)).size).toBe(links.length)
   })
 })
 
@@ -56,6 +57,7 @@ describe('visibleNavItems', () => {
       'transactions',
       'accounts',
       'import',
+      'investmentAdvisor',
       'reports',
       'assets',
       'budgets',
