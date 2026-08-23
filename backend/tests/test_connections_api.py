@@ -269,9 +269,11 @@ async def test_token_callback_passes_provider_parameters(
 
     assert resp.status_code == 200
     assert resp.json()["id"] == str(test_connection.id)
-    assert callback.await_args.args[3:5] == ("ibkr", "flex-secret")
-    assert callback.await_args.kwargs["parameters"] == {"query_id": "123456"}
-    assert callback.await_args.kwargs["sync_assets"] is True
+    callback_call = callback.await_args
+    assert callback_call is not None
+    assert callback_call.args[3:5] == ("ibkr", "flex-secret")
+    assert callback_call.kwargs["parameters"] == {"query_id": "123456"}
+    assert callback_call.kwargs["sync_assets"] is True
 
 
 @pytest.mark.asyncio
@@ -466,7 +468,9 @@ async def test_token_reconnect_reuses_initial_report_without_duplicates(
             )
         )
     ).scalars().all()
-    assert sorted(tx.external_id for tx in ibkr_transactions) == [
+    external_ids = [tx.external_id for tx in ibkr_transactions]
+    assert all(external_id is not None for external_id in external_ids)
+    assert sorted(external_id for external_id in external_ids if external_id is not None) == [
         "ibkr:U123:USD:TX-1",
         "ibkr:U123:USD:TX-2",
     ]

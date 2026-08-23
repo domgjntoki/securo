@@ -129,7 +129,9 @@ async def test_maps_currency_accounts_non_trade_activity_and_positions():
     assert transactions[0].amount == Decimal("12.34")
     assert transactions[1].type == "debit"
     assert transactions[1].amount == Decimal("5.00")
-    assert transactions[0].raw_data["transactionID"] == "TX-DIV"
+    raw_data = transactions[0].raw_data
+    assert raw_data is not None
+    assert raw_data["transactionID"] == "TX-DIV"
 
     holdings = await provider.get_holdings({})
     assert len(holdings) == 2

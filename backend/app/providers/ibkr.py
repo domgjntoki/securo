@@ -52,7 +52,7 @@ class _RedactFlexTokenFilter(logging.Filter):
                 and "/FlexWebService/" in value.path
                 and "t" in value.params
             ):
-                safe_params = [
+                safe_params: list[tuple[str, str | int | float | None]] = [
                     (key, "[REDACTED]" if key == "t" else item)
                     for key, item in value.params.multi_items()
                 ]
