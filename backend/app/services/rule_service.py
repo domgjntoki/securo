@@ -10,7 +10,12 @@ from app.models.category import Category
 from app.models.payee import Payee
 from app.models.transaction import Transaction
 from app.schemas.rule import RuleCreate, RuleExportPayload, RuleImportResponse, RuleUpdate
-from app.services.rule_engine import evaluate_conditions, apply_rule_actions
+from app.services.category_service import get_hidden_category_ids
+from app.services.rule_engine import (
+    apply_rule_actions,
+    compile_rule_regex,
+    evaluate_conditions,
+)
 from app.services.category_service import DEFAULT_CATEGORIES_I18N
 
 
@@ -63,6 +68,8 @@ async def _validate_rule_definition(
         op = _rule_item_value(condition, "op")
         if field not in _ALLOWED_CONDITION_FIELDS or op not in _ALLOWED_CONDITION_OPS:
             raise ValueError("Invalid rule condition")
+        if op == "regex":
+            compile_rule_regex(str(_rule_item_value(condition, "value") or ""))
 
     for action in actions or []:
         op = _rule_item_value(action, "op")
@@ -1164,12 +1171,22 @@ async def apply_rules_to_transaction(
     rules = result.scalars().all()
 
     category_set = transaction.category_id is not None or skip_category_rules
+    hidden_categories = (
+        await get_hidden_category_ids(session, transaction.workspace_id)
+        if getattr(transaction, "workspace_id", None) is not None
+        else set()
+    )
 
     for rule in rules:
         conditions = rule.conditions or []
         actions = rule.actions or []
         if evaluate_conditions(rule.conditions_op, conditions, transaction):
-            category_set = apply_rule_actions(actions, transaction, category_set)
+            category_set = apply_rule_actions(
+                actions,
+                transaction,
+                category_set,
+                hidden_category_ids=hidden_categories,
+            )
 
 
 async def apply_single_rule(
@@ -1202,6 +1219,7 @@ async def apply_single_rule(
     conditions = rule.conditions or []
     actions = rule.actions or []
 
+    hidden_categories = await get_hidden_category_ids(session, workspace_id)
     count = 0
     for tx in transactions:
         matches = evaluate_conditions(rule.conditions_op, conditions, tx)
@@ -1229,6 +1247,7 @@ async def apply_single_rule(
             category_already_set=tx.category_id is not None
             and not overwrite_existing_categories,
             skip_description=_has_manual_description(tx),
+            hidden_category_ids=hidden_categories,
         )
         after = (
             tx.category_id,
@@ -1263,6 +1282,7 @@ async def apply_all_rules(session: AsyncSession, workspace_id: uuid.UUID) -> int
     )
     rules = rules_result.scalars().all()
 
+    hidden_categories = await get_hidden_category_ids(session, workspace_id)
     count = 0
     for tx in transactions:
         preserve_manual_description = _has_manual_description(tx)
@@ -1294,6 +1314,7 @@ async def apply_all_rules(session: AsyncSession, workspace_id: uuid.UUID) -> int
                     tx,
                     category_set,
                     skip_description=preserve_manual_description,
+                    hidden_category_ids=hidden_categories,
                 )
 
         after = (
