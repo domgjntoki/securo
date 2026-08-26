@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { ArrowLeftRight, CalendarDays, Copy, Download, List, MoreHorizontal, Rows3 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { MonthStepper } from '@/components/month-stepper'
+import { TransactionsViewSwitcher, type TransactionsViewSwitcherProps } from '@/components/transactions-view-switcher'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -22,14 +23,7 @@ type MonthStepperConfig = {
   nextLabel: string
 }
 
-type TransactionsViewMode = 'list' | 'calendar'
-
-type ViewSwitcherConfig = {
-  value: TransactionsViewMode
-  onChange: (value: TransactionsViewMode) => void
-  listLabel: string
-  calendarLabel: string
-}
+type ViewSwitcherConfig = TransactionsViewSwitcherProps
 
 type SimilarGroupingConfig = {
   enabled: boolean
@@ -59,39 +53,12 @@ function HeaderMonthStepper({ month }: { month: MonthStepperConfig }) {
   )
 }
 
-function DesktopViewSwitcher({ view }: { view: ViewSwitcherConfig }) {
-  return (
-    <div className="inline-flex rounded-lg border border-border bg-card p-0.5">
-      <Button
-        variant={view.value === 'list' ? 'secondary' : 'ghost'}
-        size="sm"
-        className="h-8 gap-1.5 px-2.5"
-        aria-pressed={view.value === 'list'}
-        onClick={() => view.onChange('list')}
-      >
-        <List size={14} />
-        {view.listLabel}
-      </Button>
-      <Button
-        variant={view.value === 'calendar' ? 'secondary' : 'ghost'}
-        size="sm"
-        className="h-8 gap-1.5 px-2.5"
-        aria-pressed={view.value === 'calendar'}
-        onClick={() => view.onChange('calendar')}
-      >
-        <CalendarDays size={14} />
-        {view.calendarLabel}
-      </Button>
-    </div>
-  )
-}
-
 function DesktopSecondaryActions(props: TransactionsPageActionsProps) {
   const { t } = useTranslation()
   const grouping = props.grouping
   return (
     <div className="hidden sm:contents">
-      <DesktopViewSwitcher view={props.view} />
+      <TransactionsViewSwitcher {...props.view} />
       {grouping && (
         <Button
           variant={grouping.enabled ? 'secondary' : 'outline'}
