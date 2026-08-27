@@ -1930,6 +1930,8 @@
     "bankName": "Question bank name",
     "addBank": "Add bank",
     "allocationMix": "Post-contribution allocation",
+    "currentPortfolioPercentage": "Current in portfolio",
+    "idealPortfolioPercentage": "Ideal in portfolio",
     "actualValue": "Actual value",
     "actualQuantity": "Actual quantity",
     "executionNote": "Optional note",

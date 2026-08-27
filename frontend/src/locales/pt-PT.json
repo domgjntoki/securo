@@ -1831,6 +1831,8 @@
     "bankName": "Nome do banco de perguntas",
     "addBank": "Adicionar banco",
     "allocationMix": "Alocação após a contribuição",
+    "currentPortfolioPercentage": "Atual na carteira",
+    "idealPortfolioPercentage": "Ideal na carteira",
     "actualValue": "Valor realizado",
     "actualQuantity": "Quantidade realizada",
     "executionNote": "Nota opcional",

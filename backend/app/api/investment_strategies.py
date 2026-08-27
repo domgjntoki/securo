@@ -405,22 +405,16 @@ async def confirm_instrument_matches(
     )
     if instrument is None:
         raise HTTPException(status_code=404, detail="Strategy instrument not found")
-    candidates = await service.discover_matches(
-        session,
-        strategy,
-        instrument,
-        ctx.workspace.id,
-    )
-    allowed = {item.asset_id for item in candidates}
-    if not set(data.asset_ids).issubset(allowed):
-        raise HTTPException(status_code=422, detail="Confirmed asset is not a current match")
-    row = await service.update_instrument(
-        session,
-        strategy,
-        ctx.workspace.id,
-        instrument_id,
-        InstrumentUpdate(asset_ids=data.asset_ids),
-    )
+    try:
+        row = await service.update_instrument(
+            session,
+            strategy,
+            ctx.workspace.id,
+            instrument_id,
+            InstrumentUpdate(asset_ids=data.asset_ids),
+        )
+    except service.AdvisorConfigurationError as exc:
+        raise _bad_configuration(exc)
     if row is None:
         raise HTTPException(status_code=404, detail="Strategy instrument not found")
     fresh = await _strategy_or_404(session, strategy_id, ctx.workspace.id)

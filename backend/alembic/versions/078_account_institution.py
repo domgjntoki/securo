@@ -1,7 +1,7 @@
 """model institutions as first-class rows under a connection (issue #345)
 
-Revision ID: 075
-Revises: 074
+Revision ID: 078
+Revises: 077
 Create Date: 2026-08-21
 
 One SimpleFIN connection can span multiple institutions, but Securo applied
@@ -17,8 +17,8 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "075"
-down_revision: Union[str, None] = "074"
+revision: str = "078"
+down_revision: Union[str, None] = "077"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

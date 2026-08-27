@@ -1,7 +1,7 @@
 """enforce normalized payee names within each workspace
 
-Revision ID: 076
-Revises: 075
+Revision ID: 079
+Revises: 078
 Create Date: 2026-07-19
 """
 
@@ -10,8 +10,8 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-revision: str = "076"
-down_revision: Union[str, None] = "075"
+revision: str = "079"
+down_revision: Union[str, None] = "078"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

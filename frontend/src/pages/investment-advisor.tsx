@@ -21,7 +21,7 @@ import { useDisplayLocale } from '@/hooks/use-display-locale'
 import { usePrivacyMode } from '@/hooks/use-privacy-mode'
 import { assetGroups, assets, investmentStrategies } from '@/lib/api'
 import { formatCurrency } from '@/lib/format'
-import { groupContributionAllocations, summarizeAdvisorWarnings } from '@/lib/investment-advisor-utils'
+import { calculateInstrumentPortfolioPercentages, groupContributionAllocations, searchHoldingMatches, summarizeAdvisorWarnings } from '@/lib/investment-advisor-utils'
 import type { AdvisorQuestionBank, AdvisorScoringMode, Asset, ContributionAllocation, ContributionPlan, ContributionPreview, InstrumentMatchCandidate, InvestmentStrategy, MarketSymbolMatch, PlanAllocationPrice, PlanPriceRefresh, StrategyClass, StrategyInstrument } from '@/types'
 
 const selectClass = 'h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring'
@@ -476,6 +476,7 @@ function AllocationTargetEditor({
 
 function SetupView({ strategy, canWrite, wallets, holdings, refresh }: { strategy: InvestmentStrategy; canWrite: boolean; wallets: { id: string; name: string }[]; holdings: Asset[]; refresh: () => Promise<void> }) {
   const { t } = useTranslation()
+  const locale = useDisplayLocale()
   const [strategyName, setStrategyName] = useState(strategy.name)
   const [strategyCurrency, setStrategyCurrency] = useState(strategy.currency)
   const [strategyCountry, setStrategyCountry] = useState(strategy.home_country)
@@ -521,6 +522,7 @@ function SetupView({ strategy, canWrite, wallets, holdings, refresh }: { strateg
   const manualPriceSupported = source === 'manual' && (manualPriceRequired || selectedClass?.purchase_mode === 'fixed_income_hybrid')
   const portfolioClass = activeClasses.find((item) => item.id === portfolioClassId) ?? activeClasses[0]
   const portfolioInstruments = strategy.instruments.filter((item) => item.class_id === portfolioClass?.id)
+  const portfolioPercentages = calculateInstrumentPortfolioPercentages(strategy)
   const percentageTotal = portfolioInstruments.reduce(
     (sum, item) => sum + (Number(percentageTargets[item.id] ?? item.target_percentage ?? 0) || 0),
     0,
@@ -705,8 +707,10 @@ function SetupView({ strategy, canWrite, wallets, holdings, refresh }: { strateg
             const positiveAnswers = questionnairePositiveCounts[item.id] ?? item.yes_question_ids.length
             const negativeAnswers = Math.max((bank?.questions.length ?? 0) - positiveAnswers, 0)
             const finalScore = positiveAnswers - negativeAnswers
+            const percentages = portfolioPercentages.get(item.id) ?? { current: 0, ideal: 0 }
+            const percentage = (value: number) => `${value.toLocaleString(locale, { maximumFractionDigits: 2 })}%`
             return <div key={item.id} className="rounded-lg border border-border p-4">
-              <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="font-medium">{item.ticker || item.name}</p><p className="mt-0.5 text-xs text-muted-foreground">{strategyClass ? strategyClassLabel(strategyClass, t) : ''} · {item.linked_asset_ids.length ? t('investmentAdvisor.linkedHoldings', { count: item.linked_asset_ids.length }) : t('investmentAdvisor.zeroPosition')}</p>{strategyClass?.scoring_mode === 'questionnaire' && bank?.questions.length ? <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs"><span className="text-emerald-600 dark:text-emerald-400">{t('investmentAdvisor.positivePoints')}: <strong className="tabular-nums">{positiveAnswers}</strong></span><span className="text-rose-600 dark:text-rose-400">{t('investmentAdvisor.negativePoints')}: <strong className="tabular-nums">{negativeAnswers}</strong></span><span className="rounded-md bg-primary/10 px-2 py-1 font-medium text-primary">{t('investmentAdvisor.finalScore')}: <strong className="tabular-nums">{finalScore}</strong></span></div> : null}</div><div className="flex shrink-0 items-center gap-2"><Badge variant={item.allocatable ? 'default' : 'secondary'}>{strategyClass?.scoring_mode === 'percentage' && Number(item.target_percentage) === 0 ? t('investmentAdvisor.noNewAllocation') : item.allocatable ? t('investmentAdvisor.eligible') : t('investmentAdvisor.needsReview')}</Badge>{canWrite && <Button size="icon" variant="ghost" aria-label={t('common.delete')} onClick={() => mutation.mutate(() => investmentStrategies.deleteInstrument(strategy.id, item.id))}><Trash2 /></Button>}</div></div>
+              <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="font-medium">{item.ticker || item.name}</p><p className="mt-0.5 text-xs text-muted-foreground">{strategyClass ? strategyClassLabel(strategyClass, t) : ''} · {item.linked_asset_ids.length ? t('investmentAdvisor.linkedHoldings', { count: item.linked_asset_ids.length }) : t('investmentAdvisor.zeroPosition')}</p><div className="mt-2 flex flex-wrap gap-2 text-xs"><span className="rounded-md bg-muted px-2 py-1 text-muted-foreground">{t('investmentAdvisor.currentPortfolioPercentage')}: <strong className="tabular-nums text-foreground">{percentage(percentages.current)}</strong></span><span className="rounded-md bg-primary/10 px-2 py-1 text-primary">{t('investmentAdvisor.idealPortfolioPercentage')}: <strong className="tabular-nums">{percentage(percentages.ideal)}</strong></span></div>{strategyClass?.scoring_mode === 'questionnaire' && bank?.questions.length ? <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs"><span className="text-emerald-600 dark:text-emerald-400">{t('investmentAdvisor.positivePoints')}: <strong className="tabular-nums">{positiveAnswers}</strong></span><span className="text-rose-600 dark:text-rose-400">{t('investmentAdvisor.negativePoints')}: <strong className="tabular-nums">{negativeAnswers}</strong></span><span className="rounded-md bg-primary/10 px-2 py-1 font-medium text-primary">{t('investmentAdvisor.finalScore')}: <strong className="tabular-nums">{finalScore}</strong></span></div> : null}</div><div className="flex shrink-0 items-center gap-2"><Badge variant={item.allocatable ? 'default' : 'secondary'}>{strategyClass?.scoring_mode === 'percentage' && Number(item.target_percentage) === 0 ? t('investmentAdvisor.noNewAllocation') : item.allocatable ? t('investmentAdvisor.eligible') : t('investmentAdvisor.needsReview')}</Badge>{canWrite && <Button size="icon" variant="ghost" aria-label={t('common.delete')} onClick={() => mutation.mutate(() => investmentStrategies.deleteInstrument(strategy.id, item.id))}><Trash2 /></Button>}</div></div>
               {strategyClass?.scoring_mode === 'percentage' && <div className="mt-4 grid grid-cols-[minmax(0,1fr)_6rem] items-end gap-3 rounded-lg bg-muted/30 p-3">
                 <Field label={t('investmentAdvisor.instrumentTarget')}>
                   <input
@@ -742,7 +746,7 @@ function SetupView({ strategy, canWrite, wallets, holdings, refresh }: { strateg
                 <div className="mt-3 space-y-3">
                   {strategyClass?.scoring_mode === 'manual' && <div className="flex items-center gap-2"><Label className="shrink-0">{t('investmentAdvisor.strength')}</Label><Input className="max-w-24" type="number" disabled={!canWrite} defaultValue={item.manual_strength ?? 0} onBlur={(event) => { if (canWrite) mutation.mutate(() => investmentStrategies.updateInstrument(strategy.id, item.id, { manual_strength: Number(event.target.value) })) }} /></div>}
                   {strategyClass?.scoring_mode === 'questionnaire' && bank?.questions.length ? <InlineQuestionnaireAnswers strategyId={strategy.id} instrument={item} bank={bank} canWrite={canWrite} refresh={refresh} onPositiveChange={(positive) => setQuestionnairePositiveCounts((current) => ({ ...current, [item.id]: positive }))} /> : null}
-                  <MatchControls strategyId={strategy.id} instrument={item} canWrite={canWrite} refresh={refresh} />
+                  <MatchControls strategyId={strategy.id} instrument={item} canWrite={canWrite} holdings={holdings} walletIds={strategy.wallet_ids} wallets={wallets} refresh={refresh} />
                 </div>
               </details>
             </div>
@@ -860,16 +864,30 @@ function SetupView({ strategy, canWrite, wallets, holdings, refresh }: { strateg
   </Tabs>
 }
 
-function MatchControls({ strategyId, instrument, canWrite, refresh }: { strategyId: string; instrument: StrategyInstrument; canWrite: boolean; refresh: () => Promise<void> }) {
+function MatchControls({ strategyId, instrument, canWrite, holdings, walletIds, wallets, refresh }: { strategyId: string; instrument: StrategyInstrument; canWrite: boolean; holdings: Asset[]; walletIds: string[]; wallets: { id: string; name: string }[]; refresh: () => Promise<void> }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<string[]>(instrument.linked_asset_ids)
   const matchesQuery = useQuery({ queryKey: ['investment-matches', strategyId, instrument.id], queryFn: () => investmentStrategies.matches(strategyId, instrument.id), enabled: open })
   const confirmMutation = useMutation({ mutationFn: () => investmentStrategies.confirmMatches(strategyId, instrument.id, selected), onSuccess: async () => { toast.success(t('investmentAdvisor.matchesConfirmed')); await refresh() }, onError: (error) => toast.error(apiError(error, t('common.error'), t)) })
   const toggle = (candidate: InstrumentMatchCandidate) => setSelected((ids) => ids.includes(candidate.asset_id) ? ids.filter((id) => id !== candidate.asset_id) : [...ids, candidate.asset_id])
+  const manualMatches = searchHoldingMatches(holdings, walletIds, search, selected)
+  const candidates = search.trim()
+    ? manualMatches
+    : [...new Map([...manualMatches, ...(matchesQuery.data ?? [])].map((candidate) => [candidate.asset_id, candidate])).values()]
   return <div className="mt-3 border-t border-border pt-3">
     <Button type="button" size="sm" variant="outline" onClick={() => setOpen((value) => !value)}><Link2 />{t('investmentAdvisor.findMatches')}</Button>
-    {open && <div className="mt-2 space-y-2">{matchesQuery.isLoading ? <p className="text-xs text-muted-foreground">{t('common.loading')}</p> : matchesQuery.isError ? <p className="text-xs text-destructive">{t('investmentAdvisor.matchError')}</p> : matchesQuery.data?.length ? <>{matchesQuery.data.map((candidate) => <label key={candidate.asset_id} className="flex items-start gap-2 rounded-md bg-muted/50 p-2 text-sm"><input type="checkbox" className="mt-1" disabled={!canWrite} checked={selected.includes(candidate.asset_id)} onChange={() => toggle(candidate)} /><span><strong>{candidate.asset_name}</strong><span className="block text-xs text-muted-foreground">{candidate.match_kind === 'isin' ? t('investmentAdvisor.exactIsinMatch') : t('investmentAdvisor.tickerMatch')} · {candidate.current_quantity} {candidate.currency}</span></span></label>)}{canWrite && <Button size="sm" disabled={confirmMutation.isPending} onClick={() => confirmMutation.mutate()}>{t('investmentAdvisor.confirmMatches')}</Button>}</> : <p className="text-xs text-muted-foreground">{t('investmentAdvisor.noMatches')}</p>}</div>}
+    {open && <div className="mt-2 space-y-2">
+      <div className="relative"><Search className="pointer-events-none absolute left-2.5 top-2.5 size-4 text-muted-foreground" /><Input className="pl-8" aria-label={t('investmentAdvisor.findMatches')} placeholder={`${t('common.name')} · ${t('investmentAdvisor.ticker')} · ISIN`} value={search} onChange={(event) => setSearch(event.target.value)} /></div>
+      {matchesQuery.isLoading && !search.trim() ? <p className="text-xs text-muted-foreground">{t('common.loading')}</p> : matchesQuery.isError && !search.trim() ? <p className="text-xs text-destructive">{t('investmentAdvisor.matchError')}</p> : candidates.length ? candidates.map((candidate) => {
+        const walletName = wallets.find((wallet) => wallet.id === candidate.wallet_id)?.name
+        const matchLabel = candidate.match_kind === 'isin' ? t('investmentAdvisor.exactIsinMatch') : candidate.match_kind === 'ticker_exchange_currency' ? t('investmentAdvisor.tickerMatch') : t('investmentAdvisor.existingHoldingSource')
+        const identifier = candidate.ticker || candidate.isin
+        return <label key={candidate.asset_id} className="flex items-start gap-2 rounded-md bg-muted/50 p-2 text-sm"><input type="checkbox" className="mt-1" disabled={!canWrite} checked={selected.includes(candidate.asset_id)} onChange={() => toggle(candidate)} /><span><strong>{candidate.asset_name}</strong><span className="block text-xs text-muted-foreground">{[matchLabel, walletName, identifier, `${candidate.current_quantity} ${candidate.currency}`].filter(Boolean).join(' · ')}</span></span></label>
+      }) : <p className="text-xs text-muted-foreground">{t('investmentAdvisor.noMatches')}</p>}
+      {canWrite && <Button size="sm" disabled={confirmMutation.isPending} onClick={() => confirmMutation.mutate()}>{t('investmentAdvisor.confirmMatches')}</Button>}
+    </div>}
   </div>
 }
 

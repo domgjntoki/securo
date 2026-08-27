@@ -932,7 +932,7 @@ export interface InstrumentMatchCandidate {
   asset_id: string
   asset_name: string
   wallet_id: string
-  match_kind: 'isin' | 'ticker_exchange_currency'
+  match_kind: 'isin' | 'ticker_exchange_currency' | 'manual_search'
   ticker: string | null
   exchange: string | null
   currency: string

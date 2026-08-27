@@ -517,6 +517,24 @@ async def test_matching_prefers_isin_aggregates_selected_wallets_and_requires_co
     assert linked["current_value"] == "50.00"
     assert Decimal(linked["current_quantity"]) == Decimal("5")
 
+    response = await client.post(
+        f"/api/investment-strategies/{strategy['id']}/instruments/{instrument['id']}/matches/confirm",
+        headers=auth_headers,
+        json={"asset_ids": [str(first.id), str(weaker.id)]},
+    )
+    assert response.status_code == 200, response.text
+    manually_linked = response.json()
+    assert set(manually_linked["linked_asset_ids"]) == {str(first.id), str(weaker.id)}
+    assert manually_linked["current_value"] == "60.00"
+
+    response = await client.post(
+        f"/api/investment-strategies/{strategy['id']}/instruments/{instrument['id']}/matches/confirm",
+        headers=auth_headers,
+        json={"asset_ids": [str(out_of_scope.id)]},
+    )
+    assert response.status_code == 422, response.text
+    assert "selected wallet" in str(response.json())
+
 
 async def test_normalized_ticker_matching_is_ambiguous_until_subset_confirmed(
     client, auth_headers, session, test_user, test_workspace
