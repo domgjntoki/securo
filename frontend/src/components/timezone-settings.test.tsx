@@ -28,10 +28,10 @@ it('lets administrators retry a failed timezone load', async () => {
 })
 
 it('refreshes date-sensitive data without invalidating unrelated settings', async () => {
-  const pendingRefetch = new Promise<typeof settings>(() => {})
+  // First load, then the refetch after saving reports the saved zone.
   vi.mocked(admin.timezone)
     .mockResolvedValueOnce(settings)
-    .mockReturnValueOnce(pendingRefetch)
+    .mockResolvedValue({ ...settings, timezone: 'America/Sao_Paulo' })
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } })
   const affected = [
     ['accounts'],
@@ -71,7 +71,12 @@ it('refreshes date-sensitive data without invalidating unrelated settings', asyn
   await user.click(screen.getByRole('button', { name: 'Save' }))
 
   await waitFor(() => expect(admin.updateSetting).toHaveBeenCalledWith('timezone', 'America/Sao_Paulo'))
-  await waitFor(() => expect(select).toHaveTextContent('America/Sao_Paulo'))
+  // The field showed the draft before Save was pressed, so that alone proves
+  // nothing. Only a finished save clears the draft (Save goes back to
+  // disabled) and only the refetch keeps the field on the saved zone.
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled())
+  await waitFor(() => expect(admin.timezone).toHaveBeenCalledTimes(2))
+  expect(select).toHaveTextContent('America/Sao_Paulo')
   await waitFor(() => {
     for (const key of affected) expect(queryClient.getQueryState(key)?.isInvalidated).toBe(true)
   })
