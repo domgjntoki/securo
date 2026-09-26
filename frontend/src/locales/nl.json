@@ -2877,7 +2877,7 @@
       "credentialsDescription": "Voer alleen de waarden in die u wilt vervangen. Opgeslagen inloggegevens worden nooit weergegeven.",
       "securityNote": "Inloggegevens worden versleuteld opgeslagen.",
       "saveChanges": "Wijzigingen opslaan",
-      "saving": "Opslaan?",
+      "saving": "Opslaan…",
       "simplefinTitle": "SimpleFIN-verbindingen toestaan",
       "simplefinDescription": "Sta gebruikers toe bankrekeningen te koppelen met hun eigen SimpleFIN-installatietoken.",
       "notSet": "Niet ingesteld",

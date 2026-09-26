@@ -79,6 +79,16 @@ describe('Assets exchange rate setup warning', () => {
     expect(api.fxRates.status).not.toHaveBeenCalled()
   })
 
+  it('does not warn or request exchange rate status for a zero-value foreign asset', async () => {
+    api.assets.list.mockResolvedValue([{ ...asset('EUR'), current_value: 0 }])
+    renderWithProviders(<AssetsPage />)
+
+    await screen.findByText('Holding')
+    expect(screen.queryByText(t('assets.exchangeRateSetupWarning'))).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: t('assets.exchangeRateSetupAction', { from: 'EUR', to: 'USD' }) })).not.toBeInTheDocument()
+    expect(api.fxRates.status).not.toHaveBeenCalled()
+  })
+
   it('shows non-admin guidance without an admin link', async () => {
     auth.isSuperuser = false
     renderWithProviders(<AssetsPage />)

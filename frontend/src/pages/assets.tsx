@@ -272,7 +272,7 @@ export default function AssetsPage() {
   }, [rawAssetsList, activeWalletIds])
 
   const hasForeignCurrencyAssets = assetsList?.some(
-    (asset) => asset.current_value != null && asset.currency !== userCurrency,
+    (asset) => asset.current_value != null && asset.current_value !== 0 && asset.currency !== userCurrency,
   ) ?? false
   const { data: exchangeRateStatus } = useQuery({
     queryKey: ['fx-rates', 'status'],
@@ -751,7 +751,7 @@ export default function AssetsPage() {
     const profit = getAssetProfit(asset)
     const pctOfPortfolio = asset.sell_date ? null : getPortfolioShare(asset, portfolioTotalPrimary)
     const needsBuys = isMarketPriced && !hasCost && !asset.sell_date
-    const needsExchangeRate = exchangeRatesNeedSetup && asset.current_value != null && asset.currency !== userCurrency
+    const needsExchangeRate = exchangeRatesNeedSetup && asset.current_value != null && asset.current_value !== 0 && asset.currency !== userCurrency
 
     return (
       <div key={asset.id} className="border-b border-border last:border-b-0">
